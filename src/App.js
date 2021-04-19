@@ -1,39 +1,44 @@
-import { map } from "lodash";
-import React from "react";
-import { connect } from "react-redux";
+import {map} from "lodash";
+import React, {useEffect} from "react";
+import {connect, useSelector} from "react-redux";
 
 import ServerStatus from "./components/ServerStatus";
 import startUptimeCheckInterval from "./services/uptime";
-import { getUptimes } from "./redux/selectors";
-
+import {getUptimes, getDomains} from "./redux/selectors";
+import IncludeDomainForm from "./components/IncludeDomainForm";
 import "./style.css";
 
-startUptimeCheckInterval();
+const App = ({uptimes, domains}) => {
+    useEffect(() => {
+        startUptimeCheckInterval(domains);
+    }, [domains])
 
-function App({ uptimes }) {
-  return (
-    <div className="container">
-      <h1>Uptime Monitor</h1>
+    return (
+        <div className="container">
+            <h1>Uptime Monitor</h1>
 
-      <div className="columns">
-        <div>Domain</div>
-        <div>Last Checked</div>
-        <div>Latency</div>
-        <div>Status</div>
-      </div>
+            <IncludeDomainForm/>
 
-      {map(uptimes, ({ domain }) => (
-        <ServerStatus domain={domain} />
-      ))}
-    </div>
-  );
+            <div className="columns">
+                <div>Domain</div>
+                <div>Last Checked</div>
+                <div>Latency</div>
+                <div>Status</div>
+            </div>
+
+            {map(uptimes, ({domain}) => (
+                <ServerStatus domain={domain}/>
+            ))}
+        </div>
+    );
 }
 
 const enhance = connect(
-  state => ({
-    uptimes: getUptimes(state)
-  }),
-  dispatch => ({})
+    state => ({
+        uptimes: getUptimes(state),
+        domains: getDomains(state)
+    }),
+    dispatch => ({})
 );
 
 export default enhance(App);

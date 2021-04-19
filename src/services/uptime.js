@@ -1,34 +1,28 @@
 import axios from "axios";
+import {setUptime} from "../redux/actions";
 
-import { setUptime } from "../redux/actions";
+const checkUptime = async domains => {
+    for (const domain of domains) {
+        /**
+         * This endpoint is a dummy endpoint we have implemented for the purpose of this challenge.
+         *
+         * Some gotchas that you should know:
+         *
+         * - Any domain that starts with "pass___" always returns 'status: OK'
+         * - Any domain that starts with "fail___" always returns 'status: FAILED'
+         * - All other domains return a status of OK vs FAILED randomly
+         */
+        const url = `https://uptime-checker.tryprospect.repl.co/status?domain=${domain}`;
+        try {
+            const response = await axios.get(url);
+            setUptime(response.data);
+        } catch (e) {
+        }
+    }
 
-const DOMAINS_TO_CHECK = [
-  "passfoo.com",
-  "failxx.com",
-  "salesforce.com",
-  "gmail.com"
-];
-
-const checkUptime = async () => {
-  for (const domain of DOMAINS_TO_CHECK) {
-    /**
-     * This endpoint is a dummy endpoint we have implemented for the purpose of this challenge.
-     *
-     * Some gotchas that you should know:
-     *
-     * - Any domain that starts with "pass___" always returns 'status: OK'
-     * - Any domain that starts with "fail___" always returns 'status: FAILED'
-     * - All other domains return a status of OK vs FAILED randomly
-     */
-    const url = `https://uptime-checker.tryprospect.repl.co/status?domain=${domain}`;
-    const response = await axios.get(url);
-
-    setUptime(response.data);
-  }
+    setTimeout(() => checkUptime(domains), 5000);
 };
 
-export default () => {
-  checkUptime();
-
-  setInterval(checkUptime, 5000);
+export default domains => {
+    checkUptime(domains);
 };
